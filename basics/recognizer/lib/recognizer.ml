@@ -13,7 +13,18 @@ let rec lang2_rec list = match list with
 
 let lang2 list = lang2_rec(List.rev(list));;
 
-let lang3 _ = failwith ""
+let rec lang3_rec list =
+  match list with
+  | ['0'] -> true
+  | x::rest when (x == '0') || (x == '1') -> lang3_rec rest 
+  | _ -> false
+;; 
+
+let lang3 list =
+  match list with 
+  | '0'::lst -> lang3_rec lst 
+  | _ -> false
+;;
 
 let lang4 _ = failwith ""
 
