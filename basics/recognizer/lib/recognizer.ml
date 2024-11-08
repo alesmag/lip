@@ -20,7 +20,7 @@ let lang2 list =
 let rec lang3_rec list =
   match list with
   | ['0'] -> true
-  | x::rest when (x == '0') || (x == '1') -> lang3_rec rest 
+  | x::lst when (x == '0') || (x == '1') -> lang3_rec lst 
   | _ -> false
 ;; 
 
@@ -30,37 +30,42 @@ let lang3 list =
   | _ -> false
 ;;
 
-let rec lang4_rec3 list =
-  match list with
-  | [] -> true
-  | '0'::lst -> lang4_rec3 lst
-  | _ -> false
-;;
-
 let rec lang4_rec2 list =
   match list with
+  | [] -> true
   | '0'::lst -> lang4_rec2 lst
-  | '1'::lst -> lang4_rec3 lst
-  | _ -> false 
-;;
-
-let rec lang4_rec1 list = 
-  match list with 
-  | '0'::lst -> lang4_rec1 lst
-  | '1'::lst -> lang4_rec2 lst
-  | _ -> false 
-;;
-
-let lang4 list =
-  match list with
-  | '0'::lst -> lang4_rec1 lst
-  | '1'::lst -> lang4_rec2 lst
   | _ -> false
 ;;
 
-let lang5 _ = failwith ""
+let rec lang4_rec1 list =
+  match list with
+  | '0'::lst -> lang4_rec1 lst
+  | '1'::lst -> lang4_rec2 lst
+  | _ -> false 
+;; 
+
+let rec lang4 list =
+  match list with
+  | '0'::lst -> lang4 lst
+  | '1'::lst -> lang4_rec1 lst
+  | _ -> false
+;;
+
+let rec lang5_rec list =
+  match list with
+  | [] -> true
+  | '0'::'0'::lst -> lang5_rec lst
+  | '1'::'1'::lst -> lang5_rec lst
+  | _ -> false
+;;
+
+let lang5 list =
+  match list with
+  | '0'::'0'::lst -> lang5_rec lst
+  | '1'::'1'::lst -> lang5_rec lst
+  | _ -> false
+;;
     
 let recognizers = [lang1;lang2;lang3;lang4;lang5]
                   
 let belongsTo w = List.map (fun f -> f w) recognizers
-  
