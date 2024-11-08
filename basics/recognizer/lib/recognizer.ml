@@ -1,17 +1,21 @@
-let rec lang1 list = match list with
+let rec lang1 list = 
+  match list with
   | [x] when (x == '0') || (x == '1') -> true
   | x::list when (x == '0') || (x == '1') -> true && lang1 list
   | _ -> false
 ;;
 
-let rec lang2_rec list = match list with
+let rec lang2_rec list = 
+  match list with
   | [] -> true
   | [x] when (x == '0') || (x == '1') -> true
   | '1'::list -> true && lang2_rec list
   | _ -> false
 ;;
 
-let lang2 list = lang2_rec(List.rev(list));;
+let lang2 list = 
+  lang2_rec(List.rev(list))
+;;
 
 let rec lang3_rec list =
   match list with
@@ -26,7 +30,33 @@ let lang3 list =
   | _ -> false
 ;;
 
-let lang4 _ = failwith ""
+let rec lang4_rec3 list =
+  match list with
+  | [] -> true
+  | '0'::lst -> lang4_rec3 lst
+  | _ -> false
+;;
+
+let rec lang4_rec2 list =
+  match list with
+  | '0'::lst -> lang4_rec2 lst
+  | '1'::lst -> lang4_rec3 lst
+  | _ -> false 
+;;
+
+let rec lang4_rec1 list = 
+  match list with 
+  | '0'::lst -> lang4_rec1 lst
+  | '1'::lst -> lang4_rec2 lst
+  | _ -> false 
+;;
+
+let lang4 list =
+  match list with
+  | '0'::lst -> lang4_rec1 lst
+  | '1'::lst -> lang4_rec2 lst
+  | _ -> false
+;;
 
 let lang5 _ = failwith ""
     
