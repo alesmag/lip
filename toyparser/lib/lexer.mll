@@ -11,5 +11,8 @@ rule read_token =
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "+" { PLUS }
+  | "-" { MINUS }
+  | "*" { MUL }
+  | "/" { DIV }
   | num { CONST (Lexing.lexeme lexbuf) }
   | eof { EOF }
