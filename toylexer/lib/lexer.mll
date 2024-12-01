@@ -15,7 +15,7 @@ let minus = ['-']
 let number = ['0'-'9']
 let point = ['.']
 let hex_start = "0x" | "0X"
-let hex_number = ['0'-'9' 'A'-'F' 'a'-'f']
+let hex_number = ['0'-'9' 'A'-'F' 'a'-'f']+
 
 let atok = to_upper chr*
 let btok = lower_vowel+

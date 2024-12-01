@@ -11,10 +11,8 @@ open Ast
 %token RPAREN
 %token EOF
 
-%left PLUS
-%left MINUS
-%left MUL
-%left DIV
+%left PLUS, MINUS
+%left MUL, DIV
 
 %start <ast> prog
 

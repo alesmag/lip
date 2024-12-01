@@ -10,3 +10,19 @@ let%test "test_eval_3" = parse "(1 + 2) + 3 + (1 + 2)" |> eval = Ok 9
 let%test "test_eval_4" = parse "(7 + 2)" |> eval = Ok 9
 
 let%test "test_eval_5" = parse "1" |> eval = Ok 1
+
+let%test "test_eval_6" = parse "2 * 2 / 2" |> eval = Ok 2
+
+let%test "test_eval_7" = parse "(2 + (3 * 2) / 2) / 5" |> eval = Ok 1
+
+let%test "test_eval_8" = parse "-1 - 2 - -3" |> eval = Ok 0
+
+let%test "test_eval_9" = parse "-5 / -1" |> eval = Ok 5
+
+let%test "test_eval_10" = parse "(5 * 2) / -2" |> eval = Ok (-5)
+
+let%test "test_eval_11" = parse "0x01 + 2" |> eval = Ok 3
+
+let%test "test_eval_12" = parse "0x1A + 5" |> eval = Ok 31
+
+let%test "test_eval_13" = parse "(0x0F * 2) / 0x05" |> eval = Ok 6
