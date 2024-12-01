@@ -26,3 +26,5 @@ let%test "test_eval_11" = parse "0x01 + 2" |> eval = Ok 3
 let%test "test_eval_12" = parse "0x1A + 5" |> eval = Ok 31
 
 let%test "test_eval_13" = parse "(0x0F * 2) / 0x05" |> eval = Ok 6
+
+let%test "test_eval_14" = parse "(0x0F * 2) / 0x00" |> eval = Error(Printf.sprintf("Error: can't divide 30 by zero"))
