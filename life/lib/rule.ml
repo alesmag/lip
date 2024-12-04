@@ -1,0 +1,1 @@
+type rule = { survive: int list; birth: int list }

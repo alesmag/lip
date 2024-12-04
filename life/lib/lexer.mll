@@ -3,8 +3,7 @@
 }
 
 let white = [' ' '\t']+
-let digit = ['0'-'9']
-let num = digit+
+let num = ['0'-'9']+
 
 rule read_token =
   parse
@@ -12,5 +11,5 @@ rule read_token =
   | "S" { S }
   | "B" { B }
   | "/" { SLASH }
-  | num { CONST (int_of_string (Lexing.lexeme lexbuf)) }
+  | num { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | eof { EOF }
