@@ -3,6 +3,14 @@ open Printf
 
 type rule = { survive: int list; birth: int list }
 
+let parse_rule str =
+  let lexbuf = Lexing.from_string str in
+  try
+    Parser.main Lexer.read_token lexbuf
+  with
+  | Lexer.Error | Parser.Error -> failwith "Invalid rule format"
+
+
 (* let rec range a b = if b<a then [] else a::(range (a+1) b) *)
 
 let rec zeroes = function
