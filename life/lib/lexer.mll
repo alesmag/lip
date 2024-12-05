@@ -3,7 +3,7 @@
 }
 
 let white = [' ' '\t']+
-let num = ['0'-'9']+
+let num = ['0'-'9']
 
 rule read_token =
   parse
