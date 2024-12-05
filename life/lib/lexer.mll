@@ -4,13 +4,18 @@
 
 let white = [' ' '\t']+
 let num = ['0'-'9']
+let dots = ".."
+let slash = "/"
+let comma = ","
 
 rule read_token =
   parse
-  | white { read_token lexbuf }  
+  | white { WHITE }  
   | "S" { S }
   | "B" { B }
   | "E" { E }
-  | "/" { SLASH }
+  | comma { COMMA }
+  | slash { SLASH }
+  | dots { DOTS }
   | num { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | eof { EOF }
