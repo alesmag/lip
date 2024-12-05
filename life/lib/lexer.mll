@@ -10,6 +10,7 @@ rule read_token =
   | white { read_token lexbuf }  
   | "S" { S }
   | "B" { B }
+  | "E" { E }
   | "/" { SLASH }
   | num { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | eof { EOF }

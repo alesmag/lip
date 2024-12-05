@@ -5,6 +5,7 @@
 %token <int> INT
 %token S
 %token B
+%token E
 %token SLASH
 %token EOF
 
@@ -13,7 +14,8 @@
 %%
 
 prog:
-    | srule = S_rule; SLASH; brule = B_rule EOF { { survive = srule; birth = brule } }
+    | srule = S_rule; SLASH; brule = B_rule; EOF { { survive = srule; birth = brule } }
+    | E; srule = S_rule; SLASH; brule = B_rule; EOF { { survive = srule; birth = brule } }
 ;
 
 S_rule:
