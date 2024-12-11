@@ -25,10 +25,19 @@ let rec trace1 = function
     If(e1', e2, e3)
   | Not True -> False
   | Not False -> True
-  | And(True, True) -> True
-  | And(_, _) -> False
-  | Or(False, False) -> False
-  | Or(_, _) -> True
+  | Not(e) ->
+    let e' = trace1 e in
+    Not(e')
+  | And(True, e2) -> e2
+  | And(False, _) -> False
+  | And(e1, e2) ->
+    let e1' = trace1 e1 in
+    And(e1', e2)
+  | Or(True, _) -> True
+  | Or(False, e2) -> e2
+  | Or(e1, e2) -> 
+    let e1' = trace1 e1 in
+    Or(e1', e2)
   | _ -> raise NoRuleApplies
 
 
