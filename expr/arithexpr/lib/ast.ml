@@ -10,7 +10,15 @@ type expr =
   | Pred of expr
   | IsZero of expr
 
-let is_value : expr -> bool = function
-  | True -> true
-  | False -> false
+type exprval =
+  | Bool of bool
+  | Nat of int
+
+let string_of_val = function
+  | Bool b -> string_of_bool b
+  | Nat n -> string_of_int n
+
+let rec is_nv = function
+  | Zero -> true
+  | Succ e -> is_nv(e) 
   | _ -> false

@@ -1,4 +1,5 @@
 open ArithexprLib.Main
+open ArithexprLib.Ast
   
 (* read file, and output it to a string *)
 
