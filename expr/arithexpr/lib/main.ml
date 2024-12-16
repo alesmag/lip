@@ -22,11 +22,11 @@ exception NoRuleApplies
 
 
 let rec trace1 = function
-  | If(True,e1,_) -> e1
-  | If(False,_,e2) -> e2
-  | If(e1,e2,e3) -> If(trace1 e1, e2, e3)
-  | Not True -> False
-  | Not False -> True
+  | If(True, e1, _) -> e1
+  | If(False, _, e2) -> e2
+  | If(e1, e2, e3) -> If(trace1 e1, e2, e3)
+  | Not(True) -> False
+  | Not(False) -> True
   | Not(e) -> Not(trace1 e)
   | And(True, e2) -> e2
   | And(False, _) -> False
@@ -34,11 +34,12 @@ let rec trace1 = function
   | Or(True, _) -> True
   | Or(False, e2) -> e2
   | Or(e1, e2) -> Or(trace1 e1, e2)
-  | Pred(Succ n) when (is_nv(n)) -> n
-  | Pred(e) -> Pred(trace1 e)
   | Succ(e) -> Succ(trace1 e)
+  | Pred(Succ(n)) when (is_nv(n)) -> n
+  | Pred(e) -> Pred(trace1 e)
   | IsZero(Zero) -> True
-  | IsZero(e) -> IsZero(trace1 e)
+  | IsZero(Succ(_)) -> False
+  | IsZero(e) -> IsZero(trace1 e)  
   | _ -> raise NoRuleApplies
 
 
@@ -58,7 +59,7 @@ let rec eval : expr -> exprval = function
       | Bool true -> eval e2
       | Bool false -> eval e3
       | _ -> failwith "Error If"
-  )
+    )
 
   | Not e -> (
       match eval e with
