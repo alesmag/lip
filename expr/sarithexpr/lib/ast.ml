@@ -40,8 +40,8 @@ let string_of_val = function
 
 
 let string_of_type = function
-  | BoolT -> "BoolT"
-  | NatT -> "NatT"
+  | BoolT -> "Bool"
+  | NatT -> "Nat"
 
 
 let rec is_nv = function

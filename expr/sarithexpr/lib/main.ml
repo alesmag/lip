@@ -86,15 +86,17 @@ let rec typecheck (e : expr) : exprtype =
   | True -> BoolT
   | False -> BoolT
   | Zero -> NatT
-  | Succ(e) | Pred(e) -> (
-    match typecheck e with
-    | NatT -> NatT
-    | BoolT -> raise_type_error "Bool" "Nat" e
-    )
-  | IsZero(e) -> (
-    match typecheck e with
-    | NatT -> BoolT
-    | BoolT -> raise_type_error "Bool" "Nat" e
+  | If(e1, e2, e3) -> (
+    let t1 = typecheck e1 in
+    let t2 = typecheck e2 in
+    let t3 = typecheck e3 in
+    match t1 with
+    | BoolT ->
+      if t2 = t3 
+        then t2
+      else 
+        raise (TypeError ("Branches of If have different types"))
+    | NatT -> raise_type_error "Nat" "Bool" e1
     )
   | Not(e) -> (
     match typecheck e with
@@ -110,16 +112,13 @@ let rec typecheck (e : expr) : exprtype =
     | NatT, BoolT -> raise_type_error "Nat" "Bool" e1
     | NatT, NatT -> raise_type_error "Nat" "Bool" e
     )
-  | If(e1, e2, e3) -> (
-    let t1 = typecheck e1 in
-    let t2 = typecheck e2 in
-    let t3 = typecheck e3 in
-    match t1 with
-    | BoolT ->
-      if t2 = t3 
-        then t2
-      else 
-        raise (TypeError ("Branches of If have different types"))
-    | NatT -> raise_type_error "Nat" "Bool" e1
+  | Succ(e) | Pred(e) -> (
+    match typecheck e with
+    | NatT -> NatT
+    | BoolT -> raise_type_error "Bool" "Nat" e
     )
-
+  | IsZero(e) -> (
+    match typecheck e with
+    | NatT -> BoolT
+    | BoolT -> raise_type_error "Bool" "Nat" e
+    )
