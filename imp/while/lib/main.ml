@@ -1,63 +1,107 @@
 open Ast
+open Types
 
-let parse (s : string) : expr =
+let parse (s : string) : cmd =
   let lexbuf = Lexing.from_string s in
   let ast = Parser.prog Lexer.read lexbuf in
   ast
 
 exception NoRuleApplies
 
-
-let rec trace1 = function
-  | If(True, e1, _) -> e1
-  | If(False, _, e2) -> e2
-  | If(e1, e2, e3) -> If(trace1 e1, e2, e3)
-  | Not(True) -> False
-  | Not(False) -> True
-  | Not(e) -> Not(trace1 e)
-  | And(True, e2) -> e2
-  | And(False, _) -> False
-  | And(e1, e2) -> And(trace1 e1, e2)
-  | Or(True, _) -> True
-  | Or(False, e2) -> e2
-  | Or(e1, e2) -> Or(trace1 e1, e2)
-  | Add(e1, e2) -> Add()
-  | _ -> raise NoRuleApplies
-
-
-let rec trace e = try
-    let e' = trace1 e
-    in e::(trace e')
-  with NoRuleApplies -> [e]
-
-
-let rec eval : expr -> exprval = function
+let rec eval_expr st = function
   | True -> Bool true
   | False -> Bool false
+  | Var x -> st x
+  | Const n -> Nat n
 
-  | If(e1,e2,e3) -> (
-      match eval e1 with
-      | Bool true -> eval e2
-      | Bool false -> eval e3
-      | _ -> failwith "Error If"
-    )
-
-  | Not e -> (
-      match eval e with
-      | Bool b -> Bool (not b)
-      | _ -> failwith "Error Not"
+  | Not(e) -> (
+    match eval_expr st e with
+    | Bool b -> Bool(not b)
+    | _ -> raise (TypeError "Not")
     )
   
   | And(e1, e2) -> (
-      match eval e1 with
-      | Bool true -> eval e2
-      | Bool false -> Bool false
-      | _ -> failwith "Error And"
+    match eval_expr st e1, eval_expr st e2 with
+    | Bool b1, Bool b2 -> Bool(b1 && b2)
+    | _ -> raise (TypeError "And")
+    )
+  
+  | Or(e1, e2) -> (
+    match eval_expr st e1, eval_expr st e2 with
+    | Bool b1, Bool b2 -> Bool(b1 || b2)
+    | _ -> raise (TypeError "Or")
     )
 
-  | Or(e1, e2) -> (
-      match eval e1 with
-      | Bool true -> Bool true
-      | Bool false -> eval e2
-      | _ -> failwith "Error Or"
+  | Add(e1, e2) -> (
+    match eval_expr st e1, eval_expr st e2 with
+    | Nat n1, Nat n2 -> Nat(n1 + n2)
+    | _ -> raise (TypeError "Add")
     )
+  
+  | Sub(e1, e2) -> (
+    match eval_expr st e1, eval_expr st e2 with
+    | Nat n1, Nat n2 when (n1 >= n2) -> Nat(n1 - n2)
+    | _ -> raise (TypeError "Sub")
+    )
+  
+  | Mul(e1, e2) -> (
+    match eval_expr st e1, eval_expr st e2 with
+    | Nat n1, Nat n2 -> Nat(n1 * n2)
+    | _ -> raise (TypeError "Mul")
+    )
+
+  | Eq(e1, e2) -> (
+    match eval_expr st e1, eval_expr st e2 with
+    | Nat n1, Nat n2 -> Bool(n1 = n2)
+    | _ -> raise (TypeError "Eq")
+    )
+
+  | Leq(e1, e2) -> (
+    match eval_expr st e1, eval_expr st e2 with
+    | Nat n1, Nat n2 -> Bool(n1 <= n2)
+    | _ -> raise (TypeError "Leq")
+    )
+
+
+let bind f x v = fun y -> if y = x then v else f y
+
+let rec trace1 = function
+  | St _ -> raise NoRuleApplies
+  | Cmd(c, st) -> (
+    match c with
+    | Skip -> St st
+    | Assign(x, e) -> let v = eval_expr st e in St (bind st x v)
+    | Seq(c1, c2) -> (
+      match trace1 (Cmd(c1, st)) with
+      | St st1 -> Cmd(c2, st1)
+      | Cmd(c1', st1) -> Cmd(Seq(c1', c2), st1)
+      )
+    | If(e, c1, c2) -> (
+      match eval_expr st e with
+      | Bool true -> Cmd(c1, st)
+      | Bool false -> Cmd(c2, st)
+      | _ -> raise (TypeError "If")
+      )
+    | While(e, c) -> (
+      match eval_expr st e with
+      | Bool true -> Cmd(Seq(c, While(e, c)), st)
+      | Bool false -> St st
+      | _ -> raise (TypeError "While")
+      )
+    )
+
+    
+
+let bot = fun x -> raise (UnboundVar x)
+
+let rec trace_rec n t =
+  if n<=0 
+    then [t]
+  else 
+    try
+      let t' = trace1 t in 
+      t::(trace_rec (n-1) t')
+    with NoRuleApplies -> [t]
+
+
+let trace n t = trace_rec n (Cmd(t,bot))
