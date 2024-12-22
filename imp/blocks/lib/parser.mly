@@ -26,7 +26,12 @@
 
 %token LPAREN
 %token RPAREN
+%token LBRACKET
+%token RBRACKET
 %token EOF
+
+%token INT
+%token BOOL
 
 %left SEQ
 %nonassoc ELSE DO
@@ -67,4 +72,15 @@ cmd:
   | WHILE; e = expr; DO; c = cmd; { While(e, c) }
   | x = ID; TAKES; e=expr; { Assign(x, e) }
   | c1 = cmd; SEQ; c2 = cmd; { Seq(c1, c2) }
-  | LPAREN; c=cmd; RPAREN { c }
+  | LBRACKET; dl = decls; c = cmd; RBRACKET { Decl(dl, c) }
+;
+
+decl:
+  | INT; x = ID { IntVar x }
+  | BOOL; x = ID { BoolVar x }
+;
+
+decls:
+  | d = decl; SEQ; dl = decls { d :: dl }
+  | { [] }
+;

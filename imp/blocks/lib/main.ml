@@ -8,10 +8,20 @@ let parse (s : string) : cmd =
 
 exception NoRuleApplies
 
+let botenv = fun x -> failwith ("variable " ^ x ^ " unbound")
+let botmem = fun l -> failwith ("location " ^ string_of_int l ^ " undefined")
+let bind f x v = fun y -> if y = x then v else f y
+
+let apply st x = 
+  match topenv st x with
+  | IVar l
+  | BVar l -> getmem st l
+
+
 let rec eval_expr st = function
   | True -> Bool true
   | False -> Bool false
-  | Var x -> st x
+  | Var x -> apply st x
   | Const n -> Int n
 
   | Not(e) -> (
@@ -63,14 +73,28 @@ let rec eval_expr st = function
     )
 
 
-let bind f x v = fun y -> if y = x then v else f y
+let rec eval_decl (e, l) decls =
+  match decls with
+  | [] -> (e, l)
+  | IntVar(x) :: rest -> 
+      let e' = bind e x (IVar l) in 
+      eval_decl (e', l+1) rest
+  | BoolVar(x) :: rest -> 
+      let e' = bind e x (BVar l) in
+      eval_decl (e', l+1) rest
+
 
 let rec trace1 = function
   | St _ -> raise NoRuleApplies
   | Cmd(c, st) -> (
     match c with
     | Skip -> St st
-    | Assign(x, e) -> let v = eval_expr st e in St (bind st x v)
+    | Assign(x, e) -> (
+      match eval_expr st e, topenv st x with
+      | Bool v, BVar l -> St (setmem st (bind (getmem st) l (Bool v)))
+      | Int v, IVar l -> St (setmem st (bind (getmem st) l (Int v)))
+      | _ -> failwith "Error Assign"
+      )
     | Seq(c1, c2) -> (
       match trace1 (Cmd(c1, st)) with
       | St st1 -> Cmd(c2, st1)
@@ -88,14 +112,21 @@ let rec trace1 = function
       | Bool false -> St st
       | _ -> raise (TypeError "While")
       )
+    | Decl(d, c) -> (
+      let (e, l) = eval_decl (topenv st, getloc st) d in
+      let st' = make_state (e::(getenv st)) (getmem st) l in
+      Cmd(Block(c), st')
+      )
+    | Block(c) -> (
+      match trace1 (Cmd(c, st)) with
+      | St st -> St (setenv st (popenv st))
+      | Cmd(c1', st1) -> Cmd(Block(c1'), st1)
+      )
     )
 
-    
-
-let bot = fun x -> raise (UnboundVar x)
 
 let rec trace_rec n t =
-  if n<=0 
+  if n <= 0 
     then [t]
   else 
     try
@@ -104,4 +135,4 @@ let rec trace_rec n t =
     with NoRuleApplies -> [t]
 
 
-let trace n t = trace_rec n (Cmd(t,bot))
+let trace n c = trace_rec n (Cmd(c, make_state [botenv] botmem 0))
